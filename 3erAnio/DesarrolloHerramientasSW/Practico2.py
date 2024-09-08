@@ -4,6 +4,9 @@
 #Si no se encuentra registrada una temperatura se la almacenará con el valor None.
 #Una  vez cargados los datos se debe hacer un reporte por estación meteorológica de la temperatura máxima y mínima registrada en el período de 1 año.
 #Ej.: Si quiero saber la temperatura mínima de Córdoba hace 3 días atrás debo accederla de la siguiente forma
+#["CORDOBA OBSERVATORIO"]["tmin"][3]
+
+
 def es_numero(valor):
     try:
         float(valor)
@@ -11,23 +14,40 @@ def es_numero(valor):
     except ValueError:
         return False
 
+def contar_esp(cadena,lista):
+    index = cadena.find(lista[1])
+    longitud = len(lista[0])
+    return index-longitud
+
+
 
 estaciones= {}
 archivo = open("C:/Users/bauti/OneDrive/Desktop/IUA/3er Año/DHS/Registro_temperaturas-02092024/temperaturas.txt","r")
 for linea in archivo:
     partes = linea.strip().split()
 
-    if es_numero(partes[1]) and es_numero(partes[2]):
+    if es_numero(partes[1]) and es_numero(partes[2]): #estan las dos temperaturas
         tmax=partes[1]
         tmin=partes[2]
         nombre=" ".join(partes[3:]) # uso [3:] porque puede tener dos palabras el nombre entonces lo une
-        if(tmax==" "):
-            tmax=None
-        if(tmin==" "):
+    elif not es_numero(partes[1]): #no esta ninguna de las dos temperaturas
+        tmax=None
+        tmin=None
+        nombre=" ".join(partes[1:])
+    else: #falta solo una
+        if contar_esp(linea,partes)<2:#falta tmin
             tmin=None
-            if nombre not in  estaciones: #Cuando no esta el nombre de la estacion, lo agrega como CLAVE, y el VALOR es un diccionario que tiene como clave tmax y tmin y los valores son listas
-                estaciones[nombre]={"tmax":[], "tmin":[]}
-            estaciones[nombre]["tmax"].append(tmax)
-            estaciones[nombre]["tmin"].append(tmin)
-    else:
-        print("FF")
+            tmax=partes[1]
+            nombre=" ".join(partes[2:])
+        elif contar_esp(linea,partes)>2: #falta tmax
+            tmax=None
+            tmin=partes[1]
+            nombre = " ".join(partes[2:])
+
+    if nombre not in estaciones:  # Cuando no esta el nombre de la estacion, lo agrega como CLAVE, y el VALOR es un diccionario que tiene como clave tmax y tmin y los valores son listas
+        estaciones[nombre] = {"tmax": [], "tmin": []}
+    estaciones[nombre]["tmax"].append(tmax)
+    estaciones[nombre]["tmin"].append(tmin)
+
+dato = estaciones["BUENOS AIRES OBSERVATORIO"]["tmin"]
+print(dato)
